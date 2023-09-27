@@ -13,10 +13,10 @@ export class GamesService {
     ){}
 
     async findAll() : Promise<Game[]> {
-        return this.gameRepository.find()
+        return await this.gameRepository.find({where: {isActive: true}})
     }
 
     async save(dto : GameDto) : Promise<Game> {
-        return this.gameRepository.save(dto);
+        return await this.gameRepository.save(dto);
     }
 }

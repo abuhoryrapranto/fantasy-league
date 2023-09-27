@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GamesService } from './games.service';
 import { Game } from './game.entity';
 import { GameDto } from './dto/game.dto';
@@ -10,17 +10,19 @@ export class GamesController {
     constructor(private gameService: GamesService){}
 
     @Get('/')
-    @HttpCode(200)
     @UseInterceptors(TransformInterceptor)
     async getAllGames() : Promise<Game[]> {
-        return this.gameService.findAll();
+        const data = await this.gameService.findAll();
+        if(!data) throw new HttpException('Games not found', HttpStatus.NOT_FOUND)
+        return data;
     }
 
     @Post('/save')
-    @HttpCode(201)
     @UsePipes(ValidationPipe)
     @UseInterceptors(TransformInterceptor)
     async saveGame(@Body() dto : GameDto) : Promise<Game> {
-        return this.gameService.save(dto);
+        const save = await this.gameService.save(dto);
+        if(!save) throw new HttpException('Games not saved successfully.', HttpStatus.BAD_REQUEST)
+        return save;
     }
 }
